@@ -1,6 +1,7 @@
 #include "helper.h"
 #include <iostream>
 #include <vector>
+#include "glm/glm.hpp"
 
 static GLFWwindow* win = NULL;
 
@@ -93,7 +94,15 @@ void initVertices()
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes_size * sizeof(indexes[0]), indexes.data(), GL_STATIC_DRAW);
+}
 
+void renderFunction()
+{
+    idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
+    GLfloat cameraPosition[4] = {widthTexture/2, widthTexture+heightTexture, heightTexture/2, 0};
+    glUniform4fv(idCameraPosition, 1, cameraPosition);
+    glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
+    glDrawElements(GL_TRIANGLE_STRIP, indexes_size, GL_UNSIGNED_INT, 0);
 }
 
 void MessageCallback( GLenum source,
@@ -160,8 +169,7 @@ int main(int argc, char *argv[]) {
   initVertices();
   while(!glfwWindowShouldClose(win)) {
     glfwSwapBuffers(win);
-    glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
-    glDrawElements(GL_TRIANGLE_STRIP, indexes_size, GL_UNSIGNED_INT, 0);
+    renderFunction();
     glfwPollEvents();
   }
 
