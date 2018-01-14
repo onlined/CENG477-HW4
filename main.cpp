@@ -1,5 +1,6 @@
 #include "helper.h"
 #include <iostream>
+#include <vector>
 
 static GLFWwindow* win = NULL;
 
@@ -9,55 +10,106 @@ GLuint idFragmentShader;
 GLuint idVertexShader;
 GLuint idJpegTexture;
 GLuint idMVPMatrix;
+GLuint idCameraPosition;
+GLuint idHeightFactor;
 
 int widthTexture, heightTexture;
-
+int indexes_size;
 
 static void errorCallback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
 }
 
-void renderFunction()
+void initVertices()
 {
-	int width = 4;
-	int height = 2;
+    GLuint VertexArrayID;
+    glGenVertexArrays(1, &VertexArrayID);
+    glBindVertexArray(VertexArrayID);
+
+    glEnableVertexAttribArray(0);
+
+    GLuint vertexAttribBuffer, indexBuffer;
+	glGenBuffers(1, &vertexAttribBuffer);
+	glGenBuffers(1, &indexBuffer);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+	int width = widthTexture;
+	int height = heightTexture;
+    std::vector<float> vertices;
 	for (int i=0; i<=height; i++)
 	{
 		for (int j=0; j<=width; j++)
 		{
 			int xpos = j;
 			int zpos = height - i;
-			std::cout << "For vertex (" << j << "," << i << ") : x = " << xpos << ", z = " << zpos << std::endl;
+            vertices.push_back(xpos);
+            vertices.push_back(0);
+            vertices.push_back(zpos);
+			//std::cout << "For vertex (" << j << "," << i << ") : x = " << xpos << ", z = " << zpos << std::endl;
 		}
 	}
-	std::cout << std::endl;
-		std::cout << 0 << std::endl;
+
+    std::vector<GLuint> indexes;
+    indexes.push_back(0);
+	//std::cout << std::endl;
+	//	std::cout << 0 << std::endl;
 
 	for (int j=0; j<height; j++)
 	{
-		std::cout << (j+1) * (width+1) << std::endl << j * (width+1) + 1 << std::endl;
+        indexes.push_back((j+1) * (width+1));
+        indexes.push_back(j * (width+1) + 1);
+		//std::cout << (j+1) * (width+1) << std::endl << j * (width+1) + 1 << std::endl;
 		for (int i=1; i<=width; i++)
 		{
 		    if (i != width)
-				std::cout << (j+1) * (width+1) + i << std::endl << j * (width+1) + i + 1 << std::endl;
+            {
+                indexes.push_back((j+1) * (width+1) + i);
+                indexes.push_back(j * (width+1) + i + 1);
+				//std::cout << (j+1) * (width+1) + i << std::endl << j * (width+1) + i + 1 << std::endl;
+            }
 			else if (j != height - 1)
 			{
-				std::cout << (j+1) * (width+1) + i << std::endl;
-				std::cout << (j+1) * (width+1) + i << std::endl;
-				std::cout << (j) * (width+1) + i + 1 << std::endl;
-				std::cout << (j) * (width+1) + i + 1 << std::endl;
+				//std::cout << (j+1) * (width+1) + i << std::endl;
+				//std::cout << (j+1) * (width+1) + i << std::endl;
+				//std::cout << (j) * (width+1) + i + 1 << std::endl;
+				//std::cout << (j) * (width+1) + i + 1 << std::endl;
+                indexes.push_back((j+1) * (width+1) + i);
+                indexes.push_back((j+1) * (width+1) + i);
+                indexes.push_back((j) * (width+1) + i + 1);
+                indexes.push_back((j) * (width+1) + i + 1);
 			}
 			else
 			{
-				std::cout << (j+1) * (width+1) + i << std::endl;
-
-
+				//std::cout << (j+1) * (width+1) + i << std::endl;
+                indexes.push_back((j+1) * (width+1) + i);
 			}
 		}
 	}
 
+    indexes_size = indexes.size();
+
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes_size * sizeof(indexes[0]), indexes.data(), GL_STATIC_DRAW);
+
 }
+
+void MessageCallback( GLenum source,
+                      GLenum type,
+                      GLuint id,
+                      GLenum severity,
+                      GLsizei length,
+                      const GLchar* message,
+                      const void* userParam )
+{
+  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+
+
 
 int main(int argc, char *argv[]) {
 
@@ -92,16 +144,25 @@ int main(int argc, char *argv[]) {
       exit(-1);
   }
 
+  glEnable( GL_DEBUG_OUTPUT );
+  glDebugMessageCallback( (GLDEBUGPROC) MessageCallback, 0 );
+
   initShaders();
+
+  idMVPMatrix = glGetUniformLocation(idProgramShader, "MVP");
+  idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
+  idHeightFactor = glGetUniformLocation(idProgramShader, "heightFactor");
+
   glUseProgram(idProgramShader);
   initTexture(argv[1], &widthTexture, &heightTexture);
 
 
-  renderFunction();
+  initVertices();
   while(!glfwWindowShouldClose(win)) {
     glfwSwapBuffers(win);
+    glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
+    glDrawElements(GL_TRIANGLE_STRIP, indexes_size, GL_UNSIGNED_INT, 0);
     glfwPollEvents();
-
   }
 
 
