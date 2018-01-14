@@ -142,7 +142,12 @@ void MessageCallback( GLenum source,
             type, severity, message );
 }
 
+void fb_callback(GLFWwindow *win, int width, int height) {
 
+glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, width, height);
+}
 
 int main(int argc, char *argv[]) {
 
@@ -177,6 +182,7 @@ int main(int argc, char *argv[]) {
       exit(-1);
   }
 
+  glfwSetFramebufferSizeCallback(win, fb_callback);
   glEnable( GL_DEBUG_OUTPUT );
   glDebugMessageCallback( (GLDEBUGPROC) MessageCallback, 0 );
 
