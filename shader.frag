@@ -25,6 +25,7 @@ void main() {
   vec4 textureColor = texture(rgbTexture, textureCoordinate);
 
   // apply Phong shading by using the following parameters
+  vec4 I = vec4(1.0, 1.0, 1.0, 1.0);
   vec4 ka = vec4(0.25,0.25,0.25,1.0); // reflectance coeff. for ambient
   vec4 Ia = vec4(0.3,0.3,0.3,1.0); // light color for ambient
   vec4 Id = vec4(1.0, 1.0, 1.0, 1.0); // light color for diffuse
@@ -34,12 +35,13 @@ void main() {
   int specExp = 100; // specular exponent
 
   // compute ambient component
-  vec4 ambient = vec4(0, 0, 0, 0);
+  vec4 ambient = Ia * ka;
   // compute diffuse component
-  vec4 diffuse = vec4(0, 0, 0, 0);
+  vec4 diffuse = I * kd * max(0, dot(vertexNormal, ToLightVector));
   // compute specular component
-  vec4 specular = vec4(0, 0, 0, 0);
+  vec4 specular = I * ks * pow(max(0, dot(vertexNormal, normalize(ToLightVector + ToCameraVector))), 100);
 
   // compute the color using the following equation
   color = vec4(clamp( textureColor.xyz * vec3(ambient + diffuse + specular), 0.0, 1.0), 1.0);
+  //color = textureColor;
 }

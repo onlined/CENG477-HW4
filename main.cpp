@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 static GLFWwindow* win = NULL;
 
@@ -13,9 +14,20 @@ GLuint idJpegTexture;
 GLuint idMVPMatrix;
 GLuint idCameraPosition;
 GLuint idHeightFactor;
+GLuint idWidthTexture;
+GLuint idHeightTexture;
 
 int widthTexture, heightTexture;
 int indexes_size;
+
+glm::mat4 projectionMatrix;
+glm::mat4 viewingMatrix;
+glm::mat4 modelingMatrix;
+glm::vec3 camera_gaze(0, 0, 1);
+glm::vec3 camera_pos(0, 0, 0);
+glm::vec3 camera_up(0, 1, 0);
+
+GLfloat heightFactor = 10.0f;
 
 static void errorCallback(int error, const char* description)
 {
@@ -31,8 +43,8 @@ void initVertices()
     glEnableVertexAttribArray(0);
 
     GLuint vertexAttribBuffer, indexBuffer;
-	glGenBuffers(1, &vertexAttribBuffer);
-	glGenBuffers(1, &indexBuffer);
+  	glGenBuffers(1, &vertexAttribBuffer);
+  	glGenBuffers(1, &indexBuffer);
 
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -45,7 +57,7 @@ void initVertices()
 		for (int j=0; j<=width; j++)
 		{
 			int xpos = j;
-			int zpos = height - i;
+			int zpos = i;
             vertices.push_back(xpos);
             vertices.push_back(0);
             vertices.push_back(zpos);
@@ -94,13 +106,25 @@ void initVertices()
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes_size * sizeof(indexes[0]), indexes.data(), GL_STATIC_DRAW);
+
+    float fovyRad = M_PI / 4;
+	  projectionMatrix = glm::perspective(fovyRad, 1.0f, 0.1f, 1000.0f);
+    camera_pos = glm::vec3(widthTexture/2, widthTexture/10, -widthTexture/4);
+    camera_up = glm::vec3(0, 1, 0);
+    camera_gaze = glm::vec3(0, 0, 1);
 }
 
 void renderFunction()
 {
     idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
-    GLfloat cameraPosition[4] = {widthTexture/2, widthTexture+heightTexture, heightTexture/2, 0};
-    glUniform4fv(idCameraPosition, 1, cameraPosition);
+  	viewingMatrix = glm::lookAt(camera_pos, camera_gaze + camera_pos, camera_up);
+
+    glUniform4f(idCameraPosition, camera_pos[0], camera_pos[1], camera_pos[2], 0);
+    glUniformMatrix4fv(idMVPMatrix, 1, GL_FALSE, &(projectionMatrix * viewingMatrix)[0][0]);
+    glUniform1f(idHeightFactor, heightFactor);
+    glUniform1i(idWidthTexture, widthTexture);
+    glUniform1i(idHeightTexture, heightTexture);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
     glDrawElements(GL_TRIANGLE_STRIP, indexes_size, GL_UNSIGNED_INT, 0);
 }
@@ -161,6 +185,8 @@ int main(int argc, char *argv[]) {
   idMVPMatrix = glGetUniformLocation(idProgramShader, "MVP");
   idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
   idHeightFactor = glGetUniformLocation(idProgramShader, "heightFactor");
+  idWidthTexture = glGetUniformLocation(idProgramShader, "widthTexture");
+  idHeightTexture = glGetUniformLocation(idProgramShader, "heightTexture");
 
   glUseProgram(idProgramShader);
   initTexture(argv[1], &widthTexture, &heightTexture);
