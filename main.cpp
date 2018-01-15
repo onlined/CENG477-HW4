@@ -1,6 +1,7 @@
 #include "helper.h"
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -29,6 +30,8 @@ glm::vec3 camera_pos(0, 0, 0);
 glm::vec3 camera_up(0, 1, 0);
 
 GLfloat heightFactor = 10.0f;
+
+std::unordered_map<int, bool> states;
 
 static void errorCallback(int error, const char* description)
 {
@@ -117,8 +120,35 @@ void initVertices()
     camera_gaze = glm::vec3(0, 0, 1);
 }
 
+void makeChanges() {
+    if(states[GLFW_KEY_O])
+        heightFactor += 0.5;
+    if(states[GLFW_KEY_L])
+        heightFactor -= 0.5;
+    if(states[GLFW_KEY_A])
+        ;
+    if(states[GLFW_KEY_D])
+        ;
+    if(states[GLFW_KEY_W])
+        ;
+    if(states[GLFW_KEY_S])
+        ;
+    if(states[GLFW_KEY_U])
+        ;
+    if(states[GLFW_KEY_J])
+        ;
+}
+
 void renderFunction()
 {
+    int width, height;
+    glfwGetFramebufferSize(win, &width, &height);
+    glViewport(0, 0, width, height);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    makeChanges();
+
     idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
   	viewingMatrix = glm::lookAt(camera_pos, camera_gaze + camera_pos, camera_up);
 
@@ -144,11 +174,10 @@ void MessageCallback( GLenum source,
             type, severity, message );
 }
 
-void fb_callback(GLFWwindow*, int width, int height) {
-
-glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glViewport(0, 0, width, height);
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action != GLFW_PRESS && action != GLFW_RELEASE)
+        return;
+    states[key] = action == GLFW_PRESS;
 }
 
 int main(int argc, char *argv[]) {
@@ -184,9 +213,9 @@ int main(int argc, char *argv[]) {
       exit(-1);
   }
 
-  glfwSetFramebufferSizeCallback(win, fb_callback);
-  glEnable( GL_DEBUG_OUTPUT );
-  glDebugMessageCallback( (GLDEBUGPROC) MessageCallback, 0 );
+  glfwSetKeyCallback(win, keyCallback);
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback((GLDEBUGPROC) MessageCallback, 0);
 
   initShaders();
 
