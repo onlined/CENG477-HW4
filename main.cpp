@@ -36,6 +36,8 @@ bool fullscreen = false;
 int windowHeight = 600;
 int windowWidth = 600;
 
+float speed = 0.0f;
+
 static void errorCallback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -124,22 +126,40 @@ void initVertices()
 }
 
 void makeChanges() {
-    if(states[GLFW_KEY_O])
+    if (states[GLFW_KEY_O])
         heightFactor += 0.5;
-    if(states[GLFW_KEY_L])
+    if (states[GLFW_KEY_L])
         heightFactor -= 0.5;
-    if(states[GLFW_KEY_A])
-        ;
-    if(states[GLFW_KEY_D])
-        ;
-    if(states[GLFW_KEY_W])
-        ;
-    if(states[GLFW_KEY_S])
-        ;
-    if(states[GLFW_KEY_U])
-        ;
-    if(states[GLFW_KEY_J])
-        ;
+    if (states[GLFW_KEY_A] || states[GLFW_KEY_D])
+    {
+        const float const_angle = 0.5 * M_PI / 180.0;
+        float angle = 0.0f;
+        if (states[GLFW_KEY_A])
+            angle += const_angle;
+        if (states[GLFW_KEY_D])
+            angle -= const_angle;
+        auto left = glm::cross(camera_up, camera_gaze);
+        auto rot_matrix = glm::rotate(glm::mat4(1.0), angle, camera_up);
+        camera_gaze = glm::normalize(glm::vec3(rot_matrix * glm::vec4(camera_gaze, 0.0)));
+        camera_up = glm::cross(camera_gaze, left);
+    }
+    if (states[GLFW_KEY_S] || states[GLFW_KEY_W])
+    {
+        const float const_angle = 0.5 * M_PI / 180.0;
+        float angle = 0.0f;
+        if (states[GLFW_KEY_W])
+            angle += const_angle;
+        if (states[GLFW_KEY_S])
+            angle -= const_angle;
+        auto left = glm::cross(camera_up, camera_gaze);
+        auto rot_matrix = glm::rotate(glm::mat4(1.0), angle, left);
+        camera_gaze = glm::normalize(glm::vec3(rot_matrix * glm::vec4(camera_gaze, 0.0)));
+        camera_up = glm::cross(camera_gaze, left);
+    }
+    if (states[GLFW_KEY_U])
+        speed += 0.1;
+    if (states[GLFW_KEY_J])
+        speed -= 0.1;
 }
 
 void renderFunction()
@@ -151,6 +171,8 @@ void renderFunction()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     makeChanges();
+
+    camera_pos += glm::normalize(camera_gaze) * speed;
 
     idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
   	viewingMatrix = glm::lookAt(camera_pos, camera_gaze + camera_pos, camera_up);
@@ -181,7 +203,8 @@ void toggleFullscreen() {
     fullscreen = !fullscreen;
     GLFWmonitor *monitor;
     const GLFWvidmode *mode;
-    if(fullscreen) {
+    if (fullscreen)
+    {
         glfwGetWindowSize(win, &windowWidth, &windowHeight);
         monitor = glfwGetPrimaryMonitor();
         mode = glfwGetVideoMode(monitor);
@@ -201,7 +224,8 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
         return;
     if (action == GLFW_PRESS) // Buttons without hold
     {
-        switch (key) {
+        switch (key)
+        {
         case GLFW_KEY_F:
             toggleFullscreen();
             return;
