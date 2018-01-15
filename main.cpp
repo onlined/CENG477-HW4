@@ -32,6 +32,9 @@ glm::vec3 camera_up(0, 1, 0);
 GLfloat heightFactor = 10.0f;
 
 std::unordered_map<int, bool> states;
+bool fullscreen = false;
+int windowHeight = 600;
+int windowWidth = 600;
 
 static void errorCallback(int error, const char* description)
 {
@@ -174,9 +177,33 @@ void MessageCallback( GLenum source,
             type, severity, message );
 }
 
+void toggleFullscreen() {
+    fullscreen = !fullscreen;
+    auto monitor = glfwGetPrimaryMonitor();
+    auto mode = glfwGetVideoMode(monitor);
+    if(fullscreen)
+        glfwGetWindowSize(win, &windowWidth, &windowHeight);
+    glfwSetWindowMonitor(
+        win,
+        fullscreen ? monitor : nullptr,
+        0, 0,
+        fullscreen ? mode->width : windowWidth,
+        fullscreen ? mode->height : windowHeight,
+        fullscreen ? mode->refreshRate : 0
+    );
+}
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action != GLFW_PRESS && action != GLFW_RELEASE)
         return;
+    if (action == GLFW_PRESS) // Buttons without hold
+    {
+        switch (key) {
+        case GLFW_KEY_F:
+            toggleFullscreen();
+            return;
+        }
+    }
     states[key] = action == GLFW_PRESS;
 }
 
