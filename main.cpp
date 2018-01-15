@@ -179,10 +179,13 @@ void MessageCallback( GLenum source,
 
 void toggleFullscreen() {
     fullscreen = !fullscreen;
-    auto monitor = glfwGetPrimaryMonitor();
-    auto mode = glfwGetVideoMode(monitor);
-    if(fullscreen)
+    GLFWmonitor *monitor;
+    const GLFWvidmode *mode;
+    if(fullscreen) {
         glfwGetWindowSize(win, &windowWidth, &windowHeight);
+        monitor = glfwGetPrimaryMonitor();
+        mode = glfwGetVideoMode(monitor);
+    }
     glfwSetWindowMonitor(
         win,
         fullscreen ? monitor : nullptr,
