@@ -35,6 +35,8 @@ std::unordered_map<int, bool> states;
 bool fullscreen = false;
 int windowHeight = 600;
 int windowWidth = 600;
+int windowX = 0;
+int windowY = 0;
 
 float speed = 0.0f;
 
@@ -206,13 +208,15 @@ void toggleFullscreen() {
     if (fullscreen)
     {
         glfwGetWindowSize(win, &windowWidth, &windowHeight);
+        glfwGetWindowPos(win, &windowX, &windowY);
         monitor = glfwGetPrimaryMonitor();
         mode = glfwGetVideoMode(monitor);
     }
     glfwSetWindowMonitor(
         win,
         fullscreen ? monitor : nullptr,
-        0, 0,
+        fullscreen ? 0 : windowX,
+        fullscreen ? 0 : windowY,
         fullscreen ? mode->width : windowWidth,
         fullscreen ? mode->height : windowHeight,
         fullscreen ? mode->refreshRate : 0
