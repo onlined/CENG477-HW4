@@ -1,6 +1,6 @@
 #version 410
 
-layout(location = 0) in vec3 position;
+in vec3 position;
 
 // Data from CPU
 uniform mat4 MVP; // ModelViewProjection Matrix
@@ -51,7 +51,7 @@ void main()
    pos = vec4(position.x, getY(textureColor), position.z, 1.0);
 
    ToLightVector = normalize(lightPos - position);
-	 ToCameraVector = normalize(cameraPosition.xyz - position);
+   ToCameraVector = normalize(cameraPosition.xyz - position);
 
    vec3 point1 = vec3(position.x-1, getY(getColor(vec2(position.x-1, position.z))), position.z) - position;
    vec3 point2 = vec3(position.x, getY(getColor(vec2(position.x, position.z-1))), position.z-1) - position;

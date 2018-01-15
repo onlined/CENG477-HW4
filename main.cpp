@@ -16,6 +16,7 @@ GLuint idCameraPosition;
 GLuint idHeightFactor;
 GLuint idWidthTexture;
 GLuint idHeightTexture;
+GLuint idPosition;
 
 int widthTexture, heightTexture;
 int indexes_size;
@@ -40,7 +41,8 @@ void initVertices()
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
 
-    glEnableVertexAttribArray(0);
+    idPosition = glGetAttribLocation(idProgramShader, "position");
+    glEnableVertexAttribArray(idPosition);
 
     GLuint vertexAttribBuffer, indexBuffer;
   	glGenBuffers(1, &vertexAttribBuffer);
@@ -56,7 +58,7 @@ void initVertices()
 	{
 		for (int j=0; j<=width; j++)
 		{
-			int xpos = j;
+			int xpos = width - j;
 			int zpos = i;
             vertices.push_back(xpos);
             vertices.push_back(0);
@@ -106,6 +108,7 @@ void initVertices()
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes_size * sizeof(indexes[0]), indexes.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(idPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     float fovyRad = M_PI / 4;
 	  projectionMatrix = glm::perspective(fovyRad, 1.0f, 0.1f, 1000.0f);
@@ -125,7 +128,6 @@ void renderFunction()
     glUniform1i(idWidthTexture, widthTexture);
     glUniform1i(idHeightTexture, heightTexture);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
     glDrawElements(GL_TRIANGLE_STRIP, indexes_size, GL_UNSIGNED_INT, 0);
 }
 
@@ -142,7 +144,7 @@ void MessageCallback( GLenum source,
             type, severity, message );
 }
 
-void fb_callback(GLFWwindow *win, int width, int height) {
+void fb_callback(GLFWwindow*, int width, int height) {
 
 glClearColor(0.0f, 0.0f, 0.0f, 1.0f );
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
