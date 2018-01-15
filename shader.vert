@@ -69,10 +69,7 @@ void main()
    vec3 normal5 = cross(point6, point5);
    vec3 normal6 = cross(point1, point6);
 
-   vec3 normalsum = normalize(normal1 + normal2 + normal3 + normal4 + normal5 + normal6);
+   vertexNormal = normalize(normal1 + normal2 + normal3 + normal4 + normal5 + normal6);
 
-   vertexNormal = normalize(inverse(transpose(mat3x3(MVP))) * normalsum);
-   ToLightVector = normalize(inverse(transpose(mat3x3(MVP))) * ToLightVector);
-   ToCameraVector = normalize(inverse(transpose(mat3x3(MVP))) * ToCameraVector);
    gl_Position = MVP * vec4(pos.xyz, 1.0);
 }
