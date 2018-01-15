@@ -68,8 +68,8 @@ void initVertices()
 	{
 		for (int j=0; j<=width; j++)
 		{
-			int xpos = width - j;
-			int zpos = i;
+			int xpos = j;
+			int zpos = height - i;
             vertices.push_back(xpos);
             vertices.push_back(0);
             vertices.push_back(zpos);
@@ -127,7 +127,8 @@ void initVertices()
     camera_gaze = glm::vec3(0, 0, 1);
 }
 
-void makeChanges() {
+void makeChanges()
+{
     if (states[GLFW_KEY_O])
         heightFactor += 0.5;
     if (states[GLFW_KEY_L])
@@ -143,16 +144,15 @@ void makeChanges() {
         auto left = glm::cross(camera_up, camera_gaze);
         auto rot_matrix = glm::rotate(glm::mat4(1.0), angle, camera_up);
         camera_gaze = glm::normalize(glm::vec3(rot_matrix * glm::vec4(camera_gaze, 0.0)));
-        camera_up = glm::cross(camera_gaze, left);
     }
     if (states[GLFW_KEY_S] || states[GLFW_KEY_W])
     {
         const float const_angle = 0.5 * M_PI / 180.0;
         float angle = 0.0f;
         if (states[GLFW_KEY_W])
-            angle += const_angle;
-        if (states[GLFW_KEY_S])
             angle -= const_angle;
+        if (states[GLFW_KEY_S])
+            angle += const_angle;
         auto left = glm::cross(camera_up, camera_gaze);
         auto rot_matrix = glm::rotate(glm::mat4(1.0), angle, left);
         camera_gaze = glm::normalize(glm::vec3(rot_matrix * glm::vec4(camera_gaze, 0.0)));
@@ -176,7 +176,6 @@ void renderFunction()
 
     camera_pos += glm::normalize(camera_gaze) * speed;
 
-    idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
   	viewingMatrix = glm::lookAt(camera_pos, camera_gaze + camera_pos, camera_up);
 
     glUniform4f(idCameraPosition, camera_pos[0], camera_pos[1], camera_pos[2], 0);
@@ -282,11 +281,13 @@ int main(int argc, char *argv[]) {
   idHeightFactor = glGetUniformLocation(idProgramShader, "heightFactor");
   idWidthTexture = glGetUniformLocation(idProgramShader, "widthTexture");
   idHeightTexture = glGetUniformLocation(idProgramShader, "heightTexture");
+  idCameraPosition = glGetUniformLocation(idProgramShader, "idCameraPosition");
 
   glUseProgram(idProgramShader);
   initTexture(argv[1], &widthTexture, &heightTexture);
 
-
+  glFrontFace(GL_CW);
+  glEnable(GL_CULL_FACE);
   initVertices();
   while(!glfwWindowShouldClose(win)) {
     glfwSwapBuffers(win);
