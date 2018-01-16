@@ -40,6 +40,12 @@ int windowY = 0;
 
 float speed = 0.0f;
 
+#ifdef INEK
+int profile = GLFW_OPENGL_COMPAT_PROFILE;
+#else
+int profile = GLFW_OPENGL_ANY_PROFILE;
+#endif
+
 static void errorCallback(int error, const char* description)
 {
     fprintf(stderr, "Error: %s\n", description);
@@ -69,10 +75,10 @@ void initVertices()
 		for (int j=0; j<=width; j++)
 		{
 			int xpos = j;
-			int zpos = height - i;
-            vertices.push_back(xpos);
-            vertices.push_back(0);
-            vertices.push_back(zpos);
+			int zpos = i;
+      vertices.push_back(xpos);
+      vertices.push_back(0);
+      vertices.push_back(zpos);
 			//std::cout << "For vertex (" << j << "," << i << ") : x = " << xpos << ", z = " << zpos << std::endl;
 		}
 	}
@@ -159,9 +165,9 @@ void makeChanges()
         camera_up = glm::cross(camera_gaze, left);
     }
     if (states[GLFW_KEY_U])
-        speed += 0.1;
+        speed += 0.01;
     if (states[GLFW_KEY_J])
-        speed -= 0.1;
+        speed -= 0.01;
 }
 
 void renderFunction()
@@ -252,7 +258,7 @@ int main(int argc, char *argv[]) {
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_ANY_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, profile);
 
   win = glfwCreateWindow(600, 600, "CENG477 - HW4", NULL, NULL);
 
@@ -286,7 +292,6 @@ int main(int argc, char *argv[]) {
   glUseProgram(idProgramShader);
   initTexture(argv[1], &widthTexture, &heightTexture);
 
-  glFrontFace(GL_CW);
   glEnable(GL_CULL_FACE);
   initVertices();
   while(!glfwWindowShouldClose(win)) {
