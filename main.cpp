@@ -90,10 +90,10 @@ void initVertices()
 
 	for (int j=0; j<height; j++)
 	{
-        indexes.push_back((j+1) * (width+1));
-        indexes.push_back(j * (width+1) + 1);
+      //  indexes.push_back((j+1) * (width+1));
+      //  indexes.push_back(j * (width+1) + 1);
 		//std::cout << (j+1) * (width+1) << std::endl << j * (width+1) + 1 << std::endl;
-		for (int i=1; i<=width; i++)
+		for (int i=0; i<=width; i++)
 		{
 		    if (i != width)
             {
@@ -121,6 +121,8 @@ void initVertices()
 	}
 
     indexes_size = indexes.size();
+
+    std::cout << "Indexes size: " << indexes_size << std::endl;
 
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes_size * sizeof(indexes[0]), indexes.data(), GL_STATIC_DRAW);
@@ -279,7 +281,8 @@ int main(int argc, char *argv[]) {
   glfwSetKeyCallback(win, keyCallback);
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback((GLDEBUGPROC) MessageCallback, 0);
-
+  //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glEnable(GL_DEPTH_TEST);
   initShaders();
 
   idMVPMatrix = glGetUniformLocation(idProgramShader, "MVP");
