@@ -25,8 +25,6 @@ vec3 pos = vec3(0, 0, 0);
 
 vec4 getColor(vec2 coord)
 {
-  if (coord.x == -1 || coord.x == widthTexture+1 || coord.y == -1 || coord.y == heightTexture+1)
-    return vec4(-1, -1, -1, -1);
   return texture(rgbTexture, coord);
 }
 
@@ -37,9 +35,10 @@ float getY(vec4 textureColor)
 
 vec3 getNeighbour(vec2 coord)
 {
-  vec4 color = getColor(coord);
-  if (color.x == -1)
+  if (coord.x == -1 || coord.x == widthTexture+1 || coord.y == -1 || coord.y == heightTexture+1)
     return pos;
+  vec2 coord2 = vec2(1-coord.x/widthTexture, 1-coord.y/heightTexture);
+  vec4 color = getColor(coord2);
   return vec3(coord.x, getY(color), coord.y);
 }
 

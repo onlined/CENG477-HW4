@@ -122,8 +122,6 @@ void initVertices()
 
     indexes_size = indexes.size();
 
-    std::cout << "Indexes size: " << indexes_size << std::endl;
-
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), vertices.data(), GL_STATIC_DRAW);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes_size * sizeof(indexes[0]), indexes.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(idPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -193,19 +191,6 @@ void renderFunction()
     glUniform1i(idHeightTexture, heightTexture);
 
     glDrawElements(GL_TRIANGLE_STRIP, indexes_size, GL_UNSIGNED_INT, 0);
-}
-
-void MessageCallback( GLenum source,
-                      GLenum type,
-                      GLuint id,
-                      GLenum severity,
-                      GLsizei length,
-                      const GLchar* message,
-                      const void* userParam )
-{
-  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-            type, severity, message );
 }
 
 void toggleFullscreen() {
@@ -279,8 +264,6 @@ int main(int argc, char *argv[]) {
   }
 
   glfwSetKeyCallback(win, keyCallback);
-  glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback((GLDEBUGPROC) MessageCallback, 0);
   //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glEnable(GL_DEPTH_TEST);
   initShaders();
